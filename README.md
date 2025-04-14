@@ -54,3 +54,52 @@ Contributions are welcome! Please feel free to submit issues and pull requests.
 ## License
 
 This project is licensed under the MIT License.
+
+
+### example 
+
+```js
+// ...existing code...
+
+// 替换现有的mic按钮点击事件
+elements.micBtn.removeEventListener('click', /* 现有的处理函数 */);
+
+// 添加按下事件 - 开始录音
+elements.micBtn.addEventListener('mousedown', async () => {
+    await ensureAgentReady(agent);
+    
+    // 开始录音
+    await agent.startRecording();
+    elements.micBtn.classList.add('active');
+    
+    console.info('Recording started - mouse button pressed');
+});
+
+// 添加松开事件 - 停止录音并发送
+elements.micBtn.addEventListener('mouseup', async () => {
+    if (!agent.audioRecorder.isRecording) return;
+    
+    // 获取录制的音频数据并停止录音
+    const audioData = await agent.stopAndGetRecording();
+    
+    // 发送到服务器
+    await agent.client.sendAudio(audioData);
+    
+    elements.micBtn.classList.remove('active');
+    console.info('Recording stopped and sent - mouse button released');
+});
+
+// 添加鼠标移出按钮时也停止录音
+elements.micBtn.addEventListener('mouseleave', async () => {
+    if (!agent.audioRecorder.isRecording) return;
+    
+    // 获取录制的音频数据并停止录音
+    const audioData = await agent.stopAndGetRecording();
+    
+    // 发送到服务器
+    await agent.client.sendAudio(audioData);
+    
+    elements.micBtn.classList.remove('active');
+    console.info('Recording stopped and sent - mouse left button');
+});
+```
