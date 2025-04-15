@@ -235,10 +235,22 @@ export class GeminiWebsocketClient extends EventEmitter {
 
     async sendJSON(json) {        
         try {
+            // Check WebSocket state before sending
+            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                const state = this.ws ? 
+                    ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][this.ws.readyState] : 
+                    'NULL';
+                
+                throw new Error(`Cannot send message - WebSocket is in ${state} state`);
+            }
+            
             this.ws.send(JSON.stringify(json));
             // console.debug(`JSON Object was sent to ${this.name}:`, json);
         } catch (error) {
-            throw new Error(`Failed to send ${json} to ${this.name}:` + error);
+            console.error(`Failed to send message to ${this.name}:`, error);
+            // Emit an error event so other parts of your app can react
+            this.emit('connection_error', error);
+            throw error;
         }
     }
 }

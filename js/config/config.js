@@ -1,6 +1,9 @@
+import { Language } from "@google/genai";
+
 export const getWebsocketUrl = () => {
     const apiKey = localStorage.getItem('apiKey');
-    return `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`;
+    return `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${apiKey}`;
+            
 };
 
 export const getDeepgramApiKey = () => {
@@ -18,18 +21,20 @@ const thresholds = {
 }
 
 export const getConfig = () => ({
-    model: 'models/gemini-2.0-flash-exp',
+    model: 'models/gemini-2.0-flash-live-001',
     generationConfig: {
         temperature: parseFloat(localStorage.getItem('temperature')) || 1.8,
         top_p: parseFloat(localStorage.getItem('top_p')) || 0.95,
         top_k: parseInt(localStorage.getItem('top_k')) || 65,
         responseModalities: "audio",
         speechConfig: {
-            voiceConfig: { 
-                prebuiltVoiceConfig: { 
+            voiceConfig: {
+                prebuiltVoiceConfig: {
                     voiceName: localStorage.getItem('voiceName') || 'Aoede'
                 }
-            }
+            },           
+            languageCode:'cmn-CN'//MOST IMPORTANT
+
         }
     },
     systemInstruction: {
