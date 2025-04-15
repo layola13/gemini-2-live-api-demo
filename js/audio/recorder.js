@@ -20,6 +20,7 @@ export class AudioRecorder extends EventTarget {
         this.onAudioData = null;         // Callback for processed audio chunks
         this.isRecording = false;        // Recording state flag
         this.isSuspended = false;        // Mic suspension state
+        this.accumulatedAudio = [];
     }
 
     /**
@@ -29,6 +30,7 @@ export class AudioRecorder extends EventTarget {
      */
     async start(onAudioData) {
         this.onAudioData = onAudioData;
+        this.accumulatedAudio = []; // 重置累积数据
         try {
             // Request microphone access with specific echo cancelation and noise reduction
             this.stream = await navigator.mediaDevices.getUserMedia({ 
@@ -55,6 +57,8 @@ export class AudioRecorder extends EventTarget {
                 
                 if (event.data.event === 'chunk' && this.onAudioData) {
                     const base64Data = arrayBufferToBase64(event.data.data.int16arrayBuffer);
+                       // 收集音频数据
+                    this.accumulatedAudio.push(base64Data);
                     this.onAudioData(base64Data);
                 }
             };
@@ -78,6 +82,7 @@ export class AudioRecorder extends EventTarget {
                 return;
             }
 
+            const combinedAudio = this.accumulatedAudio.join('')
             // Stop all active media tracks
             if (this.stream) {
                 this.stream.getTracks().forEach(track => track.stop());
@@ -90,6 +95,8 @@ export class AudioRecorder extends EventTarget {
             if (this.audioContext) {
                 this.audioContext.close();
             }
+
+            return combinedAudio;
         } catch (error) {
             throw new Error('Failed to stop audio recording:' + error);
         }
